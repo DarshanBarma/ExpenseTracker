@@ -29,7 +29,7 @@ export default function Home() {
         <div className="px-16 mt-8 text-center">
           <p className="text-xl p-3 text-[#A3A3A3]">Get last 5 transactions</p>
           <button
-            className="bg-[#4F46E5] w-1/4 p-4 rounded-full text-[#F5F5F5]"
+            className="bg-emerald-800 hover:bg-emerald-900 w-1/4 p-4 rounded-full text-[#F5F5F5]"
             onClick={fetchTransactions}
           >
             Get
