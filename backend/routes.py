@@ -13,7 +13,7 @@ async def getTransaction():
     return trans
 
 #POST REQUEST
-@router.post('/')
+@router.post('/transactions')
 async def addTransaction(transaction: Data):
     collection.insert_one(dict(transaction))
     return {
@@ -29,7 +29,7 @@ async def updateTransaction(id: str, transaction: Data):
     }
 
 #DELETE REQUEST
-@router.delete('/{id}')
+@router.delete('/transactions/{id}')
 async def deleteTransaction(id:str):
     collection.find_one_and_delete({'_id': ObjectId(id)})
     return {
