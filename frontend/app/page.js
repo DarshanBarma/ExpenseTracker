@@ -5,6 +5,15 @@ import { useState } from "react";
 export default function Home() {
   const [transactions, setTransactions] = useState([]);
   const [clicked, setClicked] = useState()
+  const [formData, setFormData] = useState({
+    name:"",
+    amount: "",
+    type: "credit"
+  })
+
+  const handleSubmit = () =>{
+    console.log("Submitted")
+  }
 
   const fetchTransactions = async () => {
     try {
@@ -35,6 +44,14 @@ export default function Home() {
             Get
           </button>
         </div> 
+
+        <div className="my-6 p-6 bg-[#1A1A1A] rounded-2xl text-white"> 
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <input type="text" name="name" placeholder="Enter the name" value={formData.name} className="p-5 rounded-2xl bg-[#333] text-white"/> 
+          </form>
+        </div>
+
+
         <div className=" rounded-4xl my-8">
           <h1 className={`text-center text-3xl p-3 underline ${clicked !== undefined ? "visible" : "invisible"}`}>Transactions</h1>
           {transactions.map((transaction) => (
