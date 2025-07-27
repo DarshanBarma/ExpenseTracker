@@ -4,26 +4,44 @@ import { useState } from "react";
 
 export default function Home() {
   const [transactions, setTransactions] = useState([]);
-  const [clicked, setClicked] = useState()
+  const [clicked, setClicked] = useState();
   const [formData, setFormData] = useState({
-    name:"",
+    name: "",
     amount: "",
-    type: "credit"
-  })
+    creditDebit: "",
+  });
 
-  const handleSubmit = () =>{
-    console.log("Submitted")
-  }
+  const onValuesChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log("Form Submitted");
+    console.log(formData);
+    try{
+      const res = await axios.post('http://127.0.0.1:8000/transactions/',{
+        name : formData.name,
+        amount : parseFloat(formData.amount),
+        type: formData.creditDebit.toLowerCase()
+      })
+      console.log("Data sent", res.data)
+      fetchTransactions()
+    }
+    catch (error){
+      console.log(`Error occured ${error}`)
+    }
+  };
 
   const fetchTransactions = async () => {
     try {
       const res = await axios.get("http://127.0.0.1:8000/");
       console.log("Fetched Transactions");
       console.log(res.data);
-      setTransactions(res.data);
-      setClicked(0)
+      setTransactions(res.data.reverse());
+      setClicked(0);
     } catch (error) {
-      console.error(("An error occured", error));
+      console.error("An error occurred", error);
     }
   };
 
@@ -35,6 +53,7 @@ export default function Home() {
             Welcome to Expense Tracker
           </p>
         </div>
+
         <div className="px-16 mt-8 text-center">
           <p className="text-xl p-3 text-[#A3A3A3]">Get last 5 transactions</p>
           <button
@@ -43,28 +62,70 @@ export default function Home() {
           >
             Get
           </button>
-        </div> 
+        </div>
 
-        <div className="my-6 p-6 bg-[#1A1A1A] rounded-2xl text-white"> 
+        <div className="my-6 p-6 bg-[#1A1A1A] rounded-2xl text-white">
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <input type="text" name="name" placeholder="Enter the name" value={formData.name} className="p-5 rounded-2xl bg-[#333] text-white"/> 
+            <input
+              type="text"
+              name="name"
+              placeholder="Enter the name"
+              value={formData.name}
+              className="p-3 px-5 rounded-2xl bg-[#333] text-white"
+              onChange={onValuesChange}
+            />
+            <input
+              type="number"
+              name="amount"
+              placeholder="Enter the amount"
+              value={formData.amount}
+              className="p-3 px-5 rounded-2xl bg-[#333] text-white"
+              onChange={onValuesChange}
+            />
+            <input
+              type="text"
+              name="creditDebit"
+              placeholder="Credited or Debited"
+              value={formData.creditDebit}
+              className="p-3 px-5 rounded-2xl bg-[#333] text-white"
+              onChange={onValuesChange}
+            />
+            <button
+              className="bg-emerald-800 w-1/4 p-3 rounded-full"
+              type="submit"
+            >
+              Submit
+            </button>
           </form>
         </div>
 
-
-        <div className=" rounded-4xl my-8">
-          <h1 className={`text-center text-3xl p-3 underline ${clicked !== undefined ? "visible" : "invisible"}`}>Transactions</h1>
+        <div className="rounded-4xl my-8">
+          <h1
+            className={`text-center text-3xl p-3 underline ${
+              clicked !== undefined ? "visible" : "invisible"
+            }`}
+          >
+            Transactions
+          </h1>
           {transactions.map((transaction) => (
             <div
               key={transaction.id}
               className="bg-[#262626] p-5 my-4 rounded-xl flex justify-between text-[#F5F5F5]"
             >
               <div className="text-white">
-                <p className="text-lg"> Transaction ID : {transaction.id}</p>
-                <p className="text-lg">Name : {transaction.name}</p>
+                <p className="text-lg">Transaction ID: {transaction.id}</p>
+                <p className="text-lg">Name: {transaction.name}</p>
               </div>
               <div>
-                <p className={`font-semibold ${transaction.type === 'credit'? "text-green-400" : "text-red-400"}`}>Amount : ₹ {transaction.amount}</p>
+                <p
+                  className={`font-semibold ${
+                    transaction.type === "credit"
+                      ? "text-green-400"
+                      : "text-red-400"
+                  }`}
+                >
+                  Amount: ₹ {transaction.amount}
+                </p>
               </div>
             </div>
           ))}
