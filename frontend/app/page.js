@@ -1,5 +1,6 @@
 "use client";
 import axios from "axios";
+import { useEffect } from "react";
 import { useState } from "react";
 
 export default function Home() {
@@ -10,6 +11,7 @@ export default function Home() {
     amount: "",
     creditDebit: "",
   });
+  const [balance, setBalance] = useState(0);
 
   const onValuesChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -19,17 +21,41 @@ export default function Home() {
     e.preventDefault();
     console.log("Form Submitted");
     console.log(formData);
-    try{
-      const res = await axios.post('http://127.0.0.1:8000/transactions/',{
-        name : formData.name,
-        amount : parseFloat(formData.amount),
-        type: formData.creditDebit.toLowerCase()
-      })
-      console.log("Data sent", res.data)
-      fetchTransactions()
+    try {
+      const res = await axios.post("http://127.0.0.1:8000/transactions/", {
+        name: formData.name,
+        amount: parseFloat(formData.amount),
+        type: formData.creditDebit.toLowerCase(),
+      });
+      console.log("Data sent", res.data);
+      balanceCheck();
+      fetchTransactions();
+    } catch (error) {
+      console.log(`Error occured ${error}`);
     }
-    catch (error){
-      console.log(`Error occured ${error}`)
+  };
+
+  const balanceCheck = async () => {
+    try {
+      const res = await axios.get("http://127.0.0.1:8000/");
+      const transactions = res.data;
+
+      let debit = 0;
+      let credit = 0;
+
+      transactions.forEach((tx) => {
+        const amount = parseFloat(tx.amount);
+        if (tx.type.toLowerCase() === "credit") {
+          credit += amount;
+        } else if (tx.type.toLowerCase() === "debit") {
+          debit += amount;
+        }
+      });
+
+      const total = credit - debit;
+      setBalance(total)
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -37,13 +63,17 @@ export default function Home() {
     try {
       const res = await axios.get("http://127.0.0.1:8000/");
       console.log("Fetched Transactions");
-      console.log(res.data);
       setTransactions(res.data.reverse());
       setClicked(0);
     } catch (error) {
       console.error("An error occurred", error);
     }
   };
+
+  useEffect(() => {
+  balanceCheck();
+}, []);
+
 
   return (
     <>
@@ -53,15 +83,20 @@ export default function Home() {
             Welcome to Expense Tracker
           </p>
         </div>
-
-        <div className="px-16 mt-8 text-center">
-          <p className="text-xl p-3 text-[#A3A3A3]">Get last 5 transactions</p>
-          <button
-            className="bg-emerald-800 hover:bg-emerald-900 w-1/4 p-4 rounded-full text-[#F5F5F5]"
-            onClick={fetchTransactions}
-          >
-            Get
-          </button>
+        <div>
+          <div className="px-16 mt-8 text-center">
+            <p className="text-xl p-3 text-[#A3A3A3]">Get all transactions</p>
+            <button
+              className="bg-emerald-800 hover:bg-emerald-900 w-1/4 p-4 rounded-full text-[#F5F5F5]"
+              onClick={fetchTransactions}
+            >
+              Get
+            </button>
+          </div>
+          <div><p className="text-2xl text-center text-white mt-4">
+  💰 Current Balance: ₹ {balance}
+</p>
+</div>
         </div>
 
         <div className="my-6 p-6 bg-[#1A1A1A] rounded-2xl text-white">
